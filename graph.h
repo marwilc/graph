@@ -47,8 +47,8 @@ class Graph
         void setG(NodeVert<T>* ptr);
         void addVert(const T &v);
         void addArc(const T &v, const T &w, const float &c);
-        void deleteVert(const T &v);//falta
-        void deleteArc(const T &v, const T &w);//falta        
+        void deleteVert(const T &v);
+        void deleteArc(const T &v, const T &w);
 };
 //destructores
 template <class T>
@@ -128,11 +128,11 @@ bool Graph<T>::thereVert(const T& v) const
             aux=aux->getNext();
         }
     }
-    return band;
+    return (band);
 }
 
 template <class T>
-bool Graph::thereArc(const T& v, const T& w) const
+bool Graph<T>::thereArc(const T& v, const T& w) const
 {
     NodeVert<T> *auxVert;
     NodeAdy<T> *auxAdy;
@@ -318,9 +318,100 @@ void Graph<T>::addArc(const T& v, const T& w, const float& c)
 }
 
 template <class T>
-void Graph::deleteVert(const T& v)
+void Graph<T>::deleteVert(const T& v)
 {
-    
+    NodeVert<T> *actVert, *antVert;
+    NodeAdy<T> *actAdy, *antAdy;
+    bool encontrado=false;
+
+    antVert=NULL;
+    actVert=g;
+    while(actVert!=NULL && !encontrado)
+    {
+    	if(actVert->getInfo()==v)
+    	{
+    		encontrado=true;
+
+    	}
+    	else
+    	{
+    		antVert=actVert;
+    		actVert=actVert->getNext();
+    	}
+    }
+
+    if(encontrado)
+    {
+    	actAdy=actVert->getListAdy();
+    	while(actAdy!=NULL)
+    	{
+    		antAdy=actAdy;
+    		actAdy=actAdy->getNext();
+    		antAdy->setNext(NULL);
+    		delete(antAdy);
+    	}
+    	if(antVert==NULL)
+    	{
+    		g=actVert->getNext();
+
+    	}
+    	else
+    	{
+    		antVert->setNext(actVert->getNext());
+    	}
+    	actVert->setNext(NULL);
+    	actVert->setListAdy(NULL);
+    	delete(actVert);
+    	this->dim--;
+    }
+}
+
+template <class T>
+void Graph<T>::deleteArc(const T &v, const T &w)
+{
+	NodeVert<T> *actVert;
+	NodeAdy<T> *actAdy, *antAdy;
+	bool encontrado=false;
+
+	actVert=g;
+	while(actVert!=NULL && !encontrado)
+	{
+		if(actVert->getInfo()==v)
+		{
+			encontrado=true;
+		}
+		else
+		{
+			actVert=actVert->getNext();
+		}
+	}
+
+	if(encontrado)
+	{
+		encontrado=false;
+		actAdy=NULL;
+		actAdy=actVert->getListAdy();
+		while(actAdy!=NULL && !encontrado)
+		{
+			if(actAdy->getInfo()==w)
+			{
+				encontrado=true;
+				if(antAdy==NULL)
+				{
+					actVert->setListAdy(actAdy->getNext());
+				}
+				else
+				{
+					antAdy->setNext(actAdy->getNext());
+				}
+				actAdy->setNext(NULL);
+				actAdy->setCost(0);
+				delete(actAdy);
+			}
+			antAdy=actAdy;
+			actAdy=actAdy->getNext();
+		}
+	}
 }
 #endif /* GRAPH_H */
 
