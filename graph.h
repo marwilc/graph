@@ -31,18 +31,21 @@ class Graph
     public:
         //constructores
         Graph<T>():g(NULL), dim(0){};
+        Graph<T>(const T &e);
         //destructores
         ~Graph<T>();
         void clear();
         //consultores
         NodeVert<T>* getG(){return(g);};
-        bool isEmpty()const {return(g==NULL);};
+        bool isEmpty()const {return(g==NULL);}
         bool thereVert(const T &v)const;
         bool thereArc(const T &v, const T &w)const;
         float costArc(const T &v, const T &w)const;
         int orderGraph()const{return(dim);};
         list<T> predecessors(const T &v);
         list<T> successors(const T &v);
+        T getVert() const;
+        void print();
         //modificadores
         void setG(NodeVert<T>* ptr);
         void addVert(const T &v);
@@ -50,6 +53,17 @@ class Graph
         void deleteVert(const T &v);
         void deleteArc(const T &v, const T &w);
 };
+//constuctor
+template <class T>
+Graph<T>::Graph(const T &e)
+{
+	NodeVert<T>* aux;
+	int n;
+
+	aux=new NodeVert<T>(e);
+	this->dim=1;
+	this->g=aux;
+}
 //destructores
 template <class T>
 Graph<T>::~Graph()
@@ -251,6 +265,35 @@ list<T> Graph<T>::successors(const T& v)
     return (p);
 }
 
+template <class T>
+T Graph<T>::getVert() const
+{
+	return(g->getInfo());
+}
+template <class T>
+void Graph<T>::print()
+{
+	 NodeVert<T> *auxVert;
+	 NodeAdy<T> *auxAdy;
+
+	    if(this->g!=NULL)
+	    {
+	        auxVert=this->g;
+	        while(auxVert!=NULL)
+	        {
+	        	cout<<"   ("<<auxVert->getInfo()<<")";
+	            auxAdy=auxVert->getListAdy();
+	            while(auxAdy!=NULL)
+	            {
+	            	cout<<"---"<<auxAdy->getCost()<<"--->("<<auxAdy->getInfo()<<")";
+	                auxAdy=auxAdy->getNext();
+	            }
+	            auxVert=auxVert->getNext();
+	            if(auxVert!=NULL)
+	            	cout<<endl<<"    |"<<endl;
+	        }
+	    }
+}
 //modificadores
 template <class T>
 void Graph<T>::addVert(const T& v)
