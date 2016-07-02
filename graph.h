@@ -13,6 +13,7 @@
 
 #ifndef GRAPH_H
 #define GRAPH_H
+#include <iomanip>
 #include <list>
 #include <queue>
 #include <stack>
@@ -285,6 +286,7 @@ void Graph<T>::print()
 	            auxAdy=auxVert->getListAdy();
 	            while(auxAdy!=NULL)
 	            {
+	            	cout<<setprecision(2)<<fixed;
 	            	cout<<"---"<<auxAdy->getCost()<<"--->("<<auxAdy->getInfo()<<")";
 	                auxAdy=auxAdy->getNext();
 	            }
@@ -345,6 +347,7 @@ void Graph<T>::addArc(const T& v, const T& w, const float& c)
                     antAdy=nextAdy;
                     nextAdy=nextAdy->getNext();                   
                 }
+
                 if(antAdy==NULL)
                 {
                     newAdy->setNext(nextAdy);
@@ -356,6 +359,7 @@ void Graph<T>::addArc(const T& v, const T& w, const float& c)
                     newAdy->setNext(nextAdy);
                 }
             }
+            origin=origin->getNext();
         }
     }
 }
@@ -406,6 +410,7 @@ void Graph<T>::deleteVert(const T& v)
     	actVert->setListAdy(NULL);
     	delete(actVert);
     	this->dim--;
+
     }
 }
 
