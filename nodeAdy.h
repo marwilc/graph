@@ -14,31 +14,54 @@
 #ifndef NODEADY_H
 #define NODEADY_H
 #include <iostream>
+//#include "nodeVert.h"
+
+template <class T>
+class NodeVert;
 
 template <class T>
 class NodeAdy
 {
     private:
-        T info;
+        NodeVert<T> *ptrVert;
+        NodeAdy *next;
+        NodeAdy *prev;
         float cost;
-        NodeAdy<T> *next;
         
+
     public:
         //contructores
-        NodeAdy<T>(): cost(0), next(NULL){};
-        NodeAdy<T>(const T &v): info(v),cost(0),next(NULL){};
-        NodeAdy<T>(const T &v, const float &c, NodeAdy<T> *ptr): info(v), cost(c), next(ptr){};
+        NodeAdy(): cost(0), next(NULL), ptrVert(NULL), prev(NULL){};
+        NodeAdy(const NodeAdy &n): ptrVert(n.ptrVert), next(n.next), prev(n.prev), cost(n.cost){};
+        NodeAdy(NodeVert<T> *ptr, const float &c): ptrVert(ptr),cost(c),next(NULL), prev(NULL){};
+        //NodeAdy(NodeVert<T> *ptr, const float &c, NodeAdy<T> *nxt, NodeAdy<T> *prv): ptrVert(ptr), cost(c), next(nxt), prev(prv){};
         //consultores
-        T getInfo()const {return(info);};
-        float getCost() const {return(cost);};
-        NodeAdy<T>* getNext(){return (next);};
+        //T getInfo()const {return(ptrVert->getInfo());};
+        float getCost() const {return(this->cost);};
+        NodeAdy* getNext()const {return (this->next);};
+        NodeAdy* getPrev()const {return(this->prev);};
+        NodeVert<T>* getPtrVert()const {return (this->ptrVert);};
         //modificadores
-        void setInfo(const T &v){this->info=v;};
-        void setCost(const float &c){cost=c;};
-        void setNext(NodeAdy<T> *ptr){next=ptr;};
-        
+        //void setInfo(const T &v){this->ptrVert->setInfo(v);};
+        void setCost(const float &c){this->cost=c;};
+        void setNext(NodeAdy *ptr){this->next=ptr;};
+        void setPrev(NodeAdy *ptr){this->prev=ptr;};
+        void setPtrVert(NodeVert<T> *ptr){this->ptrVert=ptr;};
+        NodeAdy& operator=(const NodeAdy &n);
 };
 
+template <class T>
+NodeAdy<T>& NodeAdy<T>::operator=(const NodeAdy<T> &n)
+{
+	if(this != &n)
+	{
+		next=n.next;
+		prev=n.prev;
+		cost=n.cost;
+		ptrVert=n.ptrVert;
+	}
+	return(*this);
+}
 
 #endif /* NODEADY_H */
 

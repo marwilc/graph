@@ -1,5 +1,5 @@
 # Makefile
-CFLAGS=-c -Wall
+CFLAGS=-c -Wall -g
 
 # Variables
 CC = g++
