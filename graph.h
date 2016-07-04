@@ -55,11 +55,13 @@ class Graph
         list<T> successors(const T &v)const;
         void print();
         //modificadores
-        void setG(NodeVert<T> const *ptr);
+        void setG(NodeVert<T> *ptr);
         void addVert(const T &v);
         void addArc(const T &v, const T &w, const float &c);
         void deleteVert(const T &v);
         void deleteArc(const T &v, const T &w);
+        void replaceVert(const T &x, const T &y);
+        void replaceArc(const T &xv, const T &xw, const T &yw, const float cost);
 };
 // metodos privados
 template <class T>
@@ -514,6 +516,41 @@ void Graph<T>::deleteArc(const T &v, const T &w)
 		}
 	}
 
+}
+template <class T>
+void Graph<T>::replaceVert(const T &x, const T &y )
+{
+	NodeVert<T> *aux;
+
+	if(first!=NULL)
+	{
+		aux=findVert(x,first);
+		if(aux!=NULL)
+		{
+			aux->setInfo(y);
+		}
+	}
+}
+template <class T>
+void Graph<T>::replaceArc(const T &xv, const T &xw, const T &yw, const float cost)
+{
+	NodeVert<T> *vertOrigen, *vertDestino;
+	NodeAdy<T> *actAdy;
+
+	if(first!=NULL)
+	{
+		vertOrigen=findVert(xv,first);
+		vertDestino=findVert(yw,first);
+		if(vertOrigen!=NULL && vertDestino!=NULL)
+		{
+			actAdy=findArc(xw,vertOrigen->getListAdy());
+			if(actAdy!=NULL)
+			{
+				actAdy->setPtrVert(vertDestino);
+				actAdy->setCost(cost);
+			}
+		}
+	}
 }
 #endif /* GRAPH_H */
 

@@ -31,43 +31,57 @@ void printList(list<int> l)
 }
 int main() {
 
-	Graph<int> grafo, grafo1(1), grafo2(2), grafo3(3);
-	int i,num;
+	Graph<int> grafo;
 	list<int> lSucces, lPre;
-	float n=100, p=5.2, c;
-	srand(time(NULL));
-	for(i=1;i<=10;i++)
-	{
-		grafo.addVert(i);
+	int i,n, vert, vertF;
+	float c=0.0;
 
-	}
-	for(i=1;i<=10;i++)
+	//srand(time(NULL));
+	//num = 1 + rand() % (11 - 1);
+	cin>>n;
+	for(i=1;i<=n;i++)
 	{
-		num = 1 + rand() % (11 - 1);
-		c=(float)pow(num,2)+p;
-		grafo.addArc(i, num, c);
-		p=+cos(p);
+		cin>>vert;
+		grafo.addVert(vert);
+	}
+	for(i=1;i<=n;i++)
+	{
+		cin>>vert;
+		while(cin.get()!='\n')
+		{
+			cin>>vertF;
+			grafo.addArc(vert, vertF, c);
+		}
 	}
 
-	for(i=1;i<=10;i++)
+	/*for(i=1;i<=10;i++)
 	{
 		cout<<setprecision(2)<<fixed;
 		cout<<grafo.costArc(1,i)<<endl;
 	}
+	*/
 	grafo.print();
-	lSucces=grafo.successors(1);
-	lPre=grafo.predecessors(10);
-	//imprimir lista sucesores====================
-	cout << endl<< "sucesores" << endl;
+	cout<<endl<<endl;
+	grafo.replaceVert(1, 21);
+	grafo.replaceArc(5, 7, 12, 1.33);
+	grafo.deleteArc(5, 20);
+	grafo.replaceArc(5, 12, 20, 2.55);
+	lSucces=grafo.successors(21);
 	printList(lSucces);
-	cout << endl<< "predecesores" << endl;
-	printList(lPre);
+	grafo.print();
+
+	//lPre=grafo.predecessors(10);
+	//imprimir lista sucesores====================
+	//cout << endl<< "sucesores" << endl;
+	//printList(lSucces);
+	//cout << endl<< "predecesores" << endl;
+	//printList(lPre);
 
 	cout<<endl;
 	//============================================
-	grafo.deleteVert(1);
-	grafo.print();
-	cout<<endl;
+	//grafo.deleteVert(1);
+	//grafo.print();
+	//cout<<endl;
     return (0);
 }
 
