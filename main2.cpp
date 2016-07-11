@@ -76,10 +76,10 @@ int main() {
 	r=grafo.dfsSimple();
 	printList(r);
 	cout<<endl;
-	grafo.deleteVert('E');
-	r=grafo.dfsSimple();
-	printList(r);
-	cout<<endl;
+	//grafo.deleteVert('E');
+	//r=grafo.dfsSimple();
+	//printList(r);
+	//cout<<endl;
 	//printVector(pred);
 	//cout<<endl;
 	//printVector(tdesc);
@@ -108,6 +108,7 @@ int main() {
 	//grafo.deleteVert(1);
 	//grafo.print();
 	//cout<<endl;
+	grafo.clear();
 	}
     return (0);
 }
