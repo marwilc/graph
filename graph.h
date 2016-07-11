@@ -18,6 +18,7 @@
 #include <list>
 #include <queue>
 #include <stack>
+#include <vector>
 #include "nodeAdy.h"
 #include "nodeVert.h"
 
@@ -36,32 +37,45 @@ class Graph
 
         static NodeVert<T> *findVert(const T&v ,NodeVert<T> *ptr);
         static NodeAdy<T> *findArc(const T&w, NodeAdy<T> *ptr);
-    
+        list< NodeVert <T>* > predecessorsPtr(const T &v);
+        list< NodeVert <T>* > successorsPtr(const T &v);//
+        void dfsVisit(NodeVert<T> *u, vector<int> &pred, vector<int> &tdesc, vector<int> &tfinal, vector<char> &color, int &tiempo, list<T> &r);
+        void dfsSimpleVisit(NodeVert<T> *u, list<T> &r, vector<char> &color);
+        static void taging(NodeVert<T> *ptr, const int &tag);
+
     public:
         //constructores
         Graph():first(NULL),last(NULL), nVert(0), nArc(0){};
         Graph(const T &e);
+        //Graph(list<T> &listVert, list<T> &listArc);
         //destructores
         ~Graph();
-        void clear();
+        void clear();//listo
         //consultores
-        NodeVert<T>* getG()const {return(this->first);};
-        bool isEmpty()const {return(this->first==NULL);}
-        bool thereVert(const T &v)const;
-        bool thereArc(const T &v, const T &w)const;
-        float costArc(const T &v, const T &w)const;
-        int orderGraph()const{return(this->nVert);};
-        list<T> predecessors(const T &v)const;
-        list<T> successors(const T &v)const;
-        void print();
+        NodeVert<T>* getG()const {return(this->first);};//listo
+        bool isEmpty()const {return(this->first==NULL);}//listo
+        bool thereVert(const T &v)const;//listo
+        bool thereArc(const T &v, const T &w)const;//listo
+        float costArc(const T &v, const T &w)const;//listo
+        int orderGraph()const{return(this->nVert);};//listo
+        list<T> predecessors(const T &v)const;//listo
+        list<T> successors(const T &v)const;//listo
+        //list< NodeVert <T>* > succesors(const T&v)const;//
+        //list< NodeVert <T>* > predecessors(const T&v)const;
+        void print();//listo
         //modificadores
-        void setG(NodeVert<T> *ptr);
-        void addVert(const T &v);
-        void addArc(const T &v, const T &w, const float &c);
-        void deleteVert(const T &v);
-        void deleteArc(const T &v, const T &w);
-        void replaceVert(const T &x, const T &y);
-        void replaceArc(const T &xv, const T &xw, const T &yw, const float cost);
+        void setG(NodeVert<T> *ptr);//innesesaria
+        void addVert(const T &v);//listo
+        void addArc(const T &v, const T &w, const float &c);//listo
+        void deleteVert(const T &v);//listo
+        void deleteArc(const T &v, const T &w);//listo
+        void replaceVert(const T &x, const T &y);//listo
+        void replaceArc(const T &xv, const T &xw, const T &yw, const float cost);//listo
+        //recorridos
+        list<T> dfsSimple();
+        void dfs(vector<int> &pred, vector<int> &tdesc, vector<int> &tfinal, list<int> &r);//listoS
+       //void dfsVisit(NodeVert<T> *u, vector<int> &pred, vector<int> &tdesc, vector<int> &tfinal, vector<char> &color, int &tiempo, list<T> &r);
+        void bfs();
 };
 // metodos privados
 template <class T>
@@ -97,6 +111,114 @@ NodeAdy<T>* Graph<T>::findArc(const T &w, NodeAdy<T> *ptr)
 
 	return(aux);
 }
+
+template <class T>
+list< NodeVert <T>* > Graph<T>::predecessorsPtr(const T& v)
+{
+    list<NodeVert <T>* > p;
+    NodeVert<T> *auxVert;
+    NodeAdy<T> *auxAdy;
+
+    if(this->first!=NULL)
+    {
+        auxVert=this->first;
+        while(auxVert!=NULL)
+        {
+            	auxAdy=findArc(v,auxVert->getListAdy());
+                if(auxAdy!=NULL)
+                {
+                    p.push_back(auxVert);
+                }
+            auxVert=auxVert->getNext();
+        }
+    }
+    return (p);
+}
+
+template <class T>
+list<NodeVert <T>* > Graph<T>::successorsPtr(const T& v)
+{
+    list<NodeVert <T>* > p;
+    NodeVert<T> *auxVert;
+    NodeAdy<T> *auxAdy;
+
+    if(this->first!=NULL)
+    {
+        	auxVert=findVert(v,first);
+            if(auxVert!=NULL)
+            {
+                auxAdy=auxVert->getListAdy();
+                while(auxAdy!=NULL )
+                {
+                    p.push_back(auxAdy->getPtrVert());
+                    auxAdy=auxAdy->getNext();
+                }
+            }
+    }
+    return (p);
+}
+
+template <class T>
+void Graph<T>::dfsVisit(NodeVert<T> *u, vector<int> &pred, vector<int> &tdesc, vector<int> &tfinal, vector<char> &color, int &tiempo, list<T> &r)
+{
+	list< NodeVert <T>* > l;
+	NodeVert<T> *v;
+
+	color[u->getTag()-1]='g';
+	tiempo++;
+	tdesc[u->getTag()-1]=tiempo;
+	l=this->successorsPtr(u->getInfo());
+	while(!l.empty())
+	{
+		v=l.front();
+		l.pop_front();
+		if(color.at(v->getTag()-1)=='b')
+		{
+			pred[v->getTag()-1]=u->getTag();
+			r.push_back(v->getInfo());
+			this->dfsVisit(v, pred, tdesc, tfinal, color, tiempo, r);
+
+		}
+	}
+	color[u->getTag()-1]='n';
+	tiempo++;
+	tfinal[u->getTag()-1]=tiempo;
+}
+template <class T>
+void Graph<T>::dfsSimpleVisit(NodeVert<T> *u, list<T> &r, vector<char> &color)
+{
+
+	list< NodeVert <T>* > l;
+	NodeVert<T> *v;
+
+	color[u->getTag()-1]='g';
+	l=this->successorsPtr(u->getInfo());
+	while(!l.empty())
+	{
+		v=l.front();
+		l.pop_front();
+		if(color.at(v->getTag()-1)=='b')
+		{
+			r.push_back(v->getInfo());
+			this->dfsSimpleVisit(v, r, color);
+		}
+	}
+	color[u->getTag()-1]='n';
+}
+template <class T>
+void Graph<T>::taging(NodeVert<T> *ptr, const int &tag)
+{
+	int i=tag;
+
+	while(ptr!=NULL)
+	{
+		ptr->setTag(i);
+		ptr=ptr->getNext();
+		i++;
+
+	}
+
+}
 //constuctor
 template <class T>
 Graph<T>::Graph(const T &e)
@@ -113,10 +235,11 @@ Graph<T>::Graph(const T &e)
 template <class T>
 Graph<T>::~Graph()
 {
-    NodeVert<T> *auxVert, *antVert;
-    NodeAdy<T> *auxAdy, *antAdy;
+    //NodeVert<T> *auxVert, *antVert;
+    //NodeAdy<T> *auxAdy, *antAdy;
     
-    if(this->first!=NULL)
+    this->clear();
+   /* if(this->first!=NULL)
     {
         auxVert=this->first;
         while(auxVert!=NULL)
@@ -143,7 +266,7 @@ Graph<T>::~Graph()
         this->last=NULL;
         this->nVert=0;
         this->nArc=0;
-    }
+    }*/
 }
 
 template <class T>
@@ -173,6 +296,7 @@ void Graph<T>::clear()
             antVert->setNext(NULL);
             antVert->setPrev(NULL);
             antVert->setListAdy(NULL);
+            antVert->setTag(0);
             delete(antVert);
         }
         this->first=NULL;
@@ -318,18 +442,21 @@ void Graph<T>::addVert(const T& v)
     {
         first=newVert;
         last=newVert;
+        newVert->setTag(1);
     }
     else if(antVert==NULL && nextVert!=NULL)
     	{
     		first=newVert;
     		nextVert->setPrev(newVert);
     		newVert->setNext(nextVert);
+    		taging(first,nextVert->getTag());
     	}
     	else if(antVert!=NULL && nextVert==NULL)
     		{
     			last=newVert;
     			antVert->setNext(newVert);
     			newVert->setPrev(antVert);
+    			newVert->setTag(antVert->getTag()+1);
     		}
     		else
     		{
@@ -337,7 +464,9 @@ void Graph<T>::addVert(const T& v)
     			newVert->setPrev(antVert);
     			antVert->setNext(newVert);
     			nextVert->setPrev(newVert);
+    			taging(newVert,antVert->getTag()+1);
     		}
+    //newVert->setTag(nVert+1);
     nVert++;
 }
 
@@ -392,6 +521,7 @@ void Graph<T>::deleteVert(const T& v)
 {
     NodeVert<T> *actVert, *antVert,*nextVert, *vert;
     NodeAdy<T> *actAdy, *antAdy,*nextAdy;
+    int tag;
 
     actVert=findVert(v,first);
     if(actVert!=NULL)
@@ -445,6 +575,7 @@ void Graph<T>::deleteVert(const T& v)
     	}
     	antVert=actVert->getPrev();
     	nextVert=actVert->getNext();
+    	tag=actVert->getTag();
     	if(antVert==NULL && nextVert==NULL)
     	{
     		first=NULL;
@@ -455,6 +586,7 @@ void Graph<T>::deleteVert(const T& v)
     			first=nextVert;
     			nextVert->setPrev(NULL);
     			actVert->setNext(NULL);
+    			taging(first,tag);
     		}
     		else if(antVert!=NULL && nextVert==NULL)
     			{
@@ -468,7 +600,9 @@ void Graph<T>::deleteVert(const T& v)
     				 nextVert->setPrev(antVert);
     		   		 actVert->setNext(NULL);
     				 actVert->setPrev(NULL);
+    				 taging(nextVert,tag);
     			}
+    	actVert->setTag(0);
     	delete(actVert);
     	this->nVert--;
     }
@@ -551,6 +685,59 @@ void Graph<T>::replaceArc(const T &xv, const T &xw, const T &yw, const float cos
 			}
 		}
 	}
+}
+
+template <class T>
+void Graph<T>::dfs(vector<int> &pred, vector<int> &tdesc, vector<int> &tfinal, list<int> &r)
+{
+	int tiempo, i;
+	vector<char> color (this->orderGraph());
+	NodeVert<T> *aux;
+
+	for(i=1;i<=this->orderGraph();i++)
+	{
+		color[i-1]='b';
+		//pred[i-1]=0;
+	}
+
+	tiempo=0;
+	aux=this->first;
+	r.push_back(aux->getInfo());
+	for(i=1;i<=this->orderGraph();i++)
+	{
+		if(color.at(aux->getTag()-1)=='b')
+		{
+			this->dfsVisit(aux, pred, tdesc, tfinal, color, tiempo, r);
+		}
+		aux=aux->getNext();
+	}
+}
+
+template <class T>
+list<T> Graph<T> ::dfsSimple()
+{
+
+	int i;
+	list<T> r;
+	vector<char> color (this->orderGraph());
+	NodeVert<T> *aux;
+
+	for(i=1;i<=this->orderGraph();i++)
+	{
+			color[i-1]='b';
+	}
+
+	aux=this->first;
+	r.push_back(aux->getInfo());
+	for(i=1;i<=this->orderGraph();i++)
+	{
+		if(color.at(aux->getTag()-1)=='b')
+		{
+			this->dfsSimpleVisit(aux,r, color);
+		}
+		aux=aux->getNext();
+	}
+	return(r);
 }
 #endif /* GRAPH_H */
 

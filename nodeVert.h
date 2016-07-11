@@ -24,22 +24,26 @@ class NodeVert
     private:
         
         T info;
+        int tag;
         NodeVert *next;
         NodeVert *prev;
         NodeAdy<T> *listAdy;
         
     public:
         //constructores
-        NodeVert():prev(NULL),next(NULL), listAdy(NULL) {};
-        NodeVert(NodeVert const &n): info(n.info), next(n.next), prev(n.prev), listAdy(n.listAdy){};
-        NodeVert(const T &v):info(v),prev(NULL),next(NULL),listAdy(NULL){};
+        NodeVert():prev(NULL),next(NULL), listAdy(NULL), tag(0){};
+        NodeVert(const T &v):info(v),prev(NULL),next(NULL), listAdy(NULL), tag(0){};
+        NodeVert(NodeVert const &n): info(n.info), next(n.next), prev(n.prev), listAdy(n.listAdy), tag(n.tag){};
+        NodeVert(const T &v, const int &tags):info(v),prev(NULL),next(NULL),listAdy(NULL), tag(tags){};
         //NodeVert(const T &v, NodeVert<T> *prv,NodeVert<T> *nxt, NodeAdy<NodeVert<T>* > *list): info(v), prev(prv),next(nxt), listAdy(list){};
         //consultores
+        int getTag()const{return(this->tag);};
         T getInfo()const{return(this->info);};
         NodeVert* getNext()const {return(this->next);};
         NodeVert* getPrev()const {return(this->prev);};
         NodeAdy<T>* getListAdy()const {return(this->listAdy);};
         //modificadores
+        void setTag(const int &tags){this->tag=tags;};
         void setInfo(const T &v){this->info=v;};
         void setNext(NodeVert *ptr){this->next=ptr;};
         void setPrev(NodeVert *ptr){this->prev=ptr;};
@@ -56,6 +60,7 @@ NodeVert<T>& NodeVert<T>::operator=(const NodeVert<T> &n)
 		next=n.next;
 		prev=n.prev;
 		listAdy=n.listAdy;
+		tag=n.tag;
 	}
 	return(*this);
 }

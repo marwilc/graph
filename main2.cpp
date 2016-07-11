@@ -1,15 +1,12 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * main2.cpp
+ *
+ *  Created on: Jul 10, 2016 10:48:09 PM
+ *      Author: marwilc
+ *		
  */
 
-/* 
- * File:   main.cpp
- * Author: marwilc
- *
- * Created on 15 de junio de 2016, 09:54 PM
- */
+
 
 #include <cstdlib>
 #include <cstdlib>
@@ -19,18 +16,18 @@
 using namespace std;
 
 /*
- * 
+ *
  */
-void printList(list<int> l)
+void printList(list<char> l)
 {
-	list<int>:: iterator it = l.begin();
+	list<char>:: iterator it = l.begin();
 	while( it != l.end())
 	{
 		cout <<" "<<*it++;
 	}
 }
 
-void printVector(vector<int> vect)
+void printVector(vector<char> vect)
 {
 	for (unsigned i=0; i<vect.size(); i++)
 		cout<<vect.at(i)<<" ";
@@ -38,9 +35,10 @@ void printVector(vector<int> vect)
 }
 int main() {
 
-	Graph<int> grafo;
-	list<int> lSucces, lPre, r;
-	int k,i,n,cases, vert, vertF;
+	Graph<char> grafo;
+	list<char> lSucces, lPre, r;
+	int k,i,n,cases;
+	char vert, vertF;
 	float c=0.0;
 
 	//srand(time(NULL));
@@ -78,6 +76,10 @@ int main() {
 	r=grafo.dfsSimple();
 	printList(r);
 	cout<<endl;
+	grafo.deleteVert('E');
+	r=grafo.dfsSimple();
+	printList(r);
+	cout<<endl;
 	//printVector(pred);
 	//cout<<endl;
 	//printVector(tdesc);
@@ -109,4 +111,3 @@ int main() {
 	}
     return (0);
 }
-
