@@ -27,7 +27,7 @@ void printList(list<char> l)
 	}
 }
 
-void printVector(vector<char> vect)
+void printVector(vector<int> vect)
 {
 	for (unsigned i=0; i<vect.size(); i++)
 		cout<<vect.at(i)<<" ";
@@ -69,18 +69,27 @@ int main() {
 		cout<<grafo.costArc(1,i)<<endl;
 	}
 	*/
-	vector<int> pred (n), tdesc(n), tfinal(n);
+	vector<int> pred (n), tdesc(n), tfinal(n), dist(n);
 	grafo.print();
 	cout<<endl<<endl;
-	//grafo.dfs(pred, tdesc, tfinal, r);
-	r=grafo.dfsSimple();
-	printList(r);
+	if(grafo.thereCycles())
+		cout<<"Tiene ciclos";
+	else
+		cout<<"No tiene ciclos";
+
 	cout<<endl;
+	//grafo.bfs('A', dist, pred, r);
+	//grafo.dfs(pred, tdesc, tfinal, r);
+	//r=grafo.dfsSimple('E');
+	//printList(r);
+	//cout<<endl;
 	//grafo.deleteVert('E');
 	//r=grafo.dfsSimple();
 	//printList(r);
 	//cout<<endl;
 	//printVector(pred);
+	//cout<<endl;
+	//printVector(dist);
 	//cout<<endl;
 	//printVector(tdesc);
 	//cout<<endl;
@@ -109,6 +118,7 @@ int main() {
 	//grafo.print();
 	//cout<<endl;
 	grafo.clear();
+	//r.clear();
 	}
     return (0);
 }

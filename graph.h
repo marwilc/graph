@@ -19,6 +19,7 @@
 #include <queue>
 #include <stack>
 #include <vector>
+#include <limits>
 #include "nodeAdy.h"
 #include "nodeVert.h"
 
@@ -44,7 +45,7 @@ class Graph
         static void taging(NodeVert<T> *ptr, const int &tag);
 
     public:
-        //constructores
+        //Constructor's
         Graph():first(NULL),last(NULL), nVert(0), nArc(0){};
         Graph(const T &e);
         //Graph(list<T> &listVert, list<T> &listArc);
@@ -60,9 +61,9 @@ class Graph
         int orderGraph()const{return(this->nVert);};//listo
         list<T> predecessors(const T &v)const;//listo
         list<T> successors(const T &v)const;//listo
-        //list< NodeVert <T>* > succesors(const T&v)const;//
-        //list< NodeVert <T>* > predecessors(const T&v)const;
         void print();//listo
+        bool thereCycles();
+        list<T> storageSuccesors();
         //modificadores
         void setG(NodeVert<T> *ptr);//innesesaria
         void addVert(const T &v);//listo
@@ -72,12 +73,12 @@ class Graph
         void replaceVert(const T &x, const T &y);//listo
         void replaceArc(const T &xv, const T &xw, const T &yw, const float cost);//listo
         //recorridos
-        list<T> dfsSimple();
+        list<T> dfsSimple();//listo
+        list<T> dfsSimple(const T &v);//listo
         void dfs(vector<int> &pred, vector<int> &tdesc, vector<int> &tfinal, list<int> &r);//listoS
-       //void dfsVisit(NodeVert<T> *u, vector<int> &pred, vector<int> &tdesc, vector<int> &tfinal, vector<char> &color, int &tiempo, list<T> &r);
-        void bfs();
+        void bfs(const T &s, vector<int> &dist, vector<int> &pred, list<T> &r);//listo
 };
-// metodos privados
+// Methods privates
 template <class T>
 NodeVert<T>* Graph<T>::findVert(const T &v, NodeVert<T> *ptr)
 {
@@ -174,8 +175,8 @@ void Graph<T>::dfsVisit(NodeVert<T> *u, vector<int> &pred, vector<int> &tdesc, v
 		l.pop_front();
 		if(color.at(v->getTag()-1)=='b')
 		{
-			pred[v->getTag()-1]=u->getTag();
 			r.push_back(v->getInfo());
+			pred[v->getTag()-1]=u->getTag();
 			this->dfsVisit(v, pred, tdesc, tfinal, color, tiempo, r);
 
 		}
@@ -203,6 +204,7 @@ void Graph<T>::dfsSimpleVisit(NodeVert<T> *u, list<T> &r, vector<char> &color)
 			this->dfsSimpleVisit(v, r, color);
 		}
 	}
+
 	color[u->getTag()-1]='n';
 }
 template <class T>
@@ -219,6 +221,7 @@ void Graph<T>::taging(NodeVert<T> *ptr, const int &tag)
 	}
 
 }
+
 //constuctor
 template <class T>
 Graph<T>::Graph(const T &e)
@@ -409,7 +412,7 @@ void Graph<T>::print()
 	        auxVert=this->first;
 	        while(auxVert!=NULL)
 	        {
-	        	cout<<"   ("<<auxVert->getInfo()<<")";
+	        	cout<<auxVert->getTag()<<"  ("<<auxVert->getInfo()<<")";
 	            auxAdy=auxVert->getListAdy();
 	            while(auxAdy!=NULL)
 	            {
@@ -422,6 +425,50 @@ void Graph<T>::print()
 	            	cout<<endl<<"    |"<<endl;
 	        }
 	    }
+}
+template <class T>
+bool Graph<T>:: thereCycles()
+{
+	NodeVert<T> *vert;
+	bool band;
+	list<T> allSucessors;
+	if(!this->isEmpty())
+	{
+		allSucessors=this->storageSuccesors();
+		vert=first;
+		while(vert!=NULL)
+		{
+			if(vert->getListAdy()==NULL)
+			{
+				allSucessors.remove(vert->getInfo());
+			}
+			vert=vert->getNext();
+		}
+	}
+	return(!allSucessors.empty());
+}
+
+template <class T>
+list<T> Graph<T>:: storageSuccesors()
+{
+	NodeVert<T> *vert;
+	NodeAdy<T> *ady;
+	list<T> l;
+	if(this->first!=NULL)
+	{
+		vert=first;
+		for(int i=1;i<=this->nVert;i++)
+		{
+			ady=vert->getListAdy();
+			while(ady!=NULL)
+			{
+				l.push_back(ady->getPtrVert()->getInfo());
+				ady=ady->getNext();
+			}
+			vert=vert->getNext();
+		}
+	}
+	return(l);
 }
 //modificadores
 template <class T>
@@ -694,22 +741,25 @@ void Graph<T>::dfs(vector<int> &pred, vector<int> &tdesc, vector<int> &tfinal, l
 	vector<char> color (this->orderGraph());
 	NodeVert<T> *aux;
 
-	for(i=1;i<=this->orderGraph();i++)
+	if(first!=NULL)
 	{
-		color[i-1]='b';
-		//pred[i-1]=0;
-	}
-
-	tiempo=0;
-	aux=this->first;
-	r.push_back(aux->getInfo());
-	for(i=1;i<=this->orderGraph();i++)
-	{
-		if(color.at(aux->getTag()-1)=='b')
+		for(i=1;i<=this->orderGraph();i++)
 		{
-			this->dfsVisit(aux, pred, tdesc, tfinal, color, tiempo, r);
+			color[i-1]='b';
+			//pred[i-1]=0;
 		}
-		aux=aux->getNext();
+
+		tiempo=0;
+		aux=this->first;
+		r.push_back(aux->getInfo());
+		for(i=1;i<=this->orderGraph();i++)
+		{
+			if(color.at(aux->getTag()-1)=='b')
+			{
+				this->dfsVisit(aux, pred, tdesc, tfinal, color, tiempo, r);
+			}
+			aux=aux->getNext();
+		}
 	}
 }
 
@@ -722,22 +772,97 @@ list<T> Graph<T> ::dfsSimple()
 	vector<char> color (this->orderGraph());
 	NodeVert<T> *aux;
 
-	for(i=1;i<=this->orderGraph();i++)
+	if(first!=NULL)
 	{
-			color[i-1]='b';
-	}
-
-	aux=this->first;
-	r.push_back(aux->getInfo());
-	for(i=1;i<=this->orderGraph();i++)
-	{
-		if(color.at(aux->getTag()-1)=='b')
+		for(i=1;i<=this->orderGraph();i++)
 		{
-			this->dfsSimpleVisit(aux,r, color);
+			color[i-1]='b';
 		}
-		aux=aux->getNext();
+
+		aux=this->first;
+		r.push_back(aux->getInfo());
+		for(i=1;i<=this->orderGraph();i++)
+		{
+			if(color.at(aux->getTag()-1)=='b')
+			{
+				this->dfsSimpleVisit(aux,r, color);
+			}
+			aux=aux->getNext();
+		}
 	}
 	return(r);
+}
+
+template <class T>
+list<T> Graph<T> ::dfsSimple( const T &v)
+{
+
+	int i;
+	list<T> r;
+	vector<char> color (this->orderGraph());
+	NodeVert<T> *aux;
+
+	aux=findVert(v,first);
+	if(aux!=NULL)
+	{
+
+		for(i=1;i<=this->orderGraph();i++)
+		{
+			color[i-1]='b';
+		}
+		r.push_back(aux->getInfo());
+		this->dfsSimpleVisit(aux,r, color);
+	}
+	return(r);
+}
+
+
+template <class T>
+void Graph<T>::bfs(const T &s, vector<int> &dist, vector<int> &pred, list<T> &r)
+{
+	//int max=numeric_limits<int>::max();
+	int i;
+	NodeVert<T> *aux, *v, *u;
+	queue<NodeVert<T> *> c;
+	list< NodeVert <T> *> l;
+	vector<char> color(this->orderGraph());
+
+
+	aux=findVert(s, first);
+	if(aux!=NULL)
+	{
+		for(i=0;i<this->orderGraph();i++)
+		{
+			color[i]='b';
+			dist[i]=-1;
+		}
+		color[aux->getTag()-1]='g';
+		dist[aux->getTag()-1]=0;
+		c.push(aux);
+		r.push_back(s);
+		while(!c.empty())
+		{
+			u=c.front();
+			c.pop();
+			l=this->successorsPtr(u->getInfo());
+			while(!l.empty())
+			{
+				v=l.front();
+				l.pop_front();
+				if(color[v->getTag()-1]=='b')
+				{
+
+					color[v->getTag()-1]='g';
+					dist[v->getTag()-1]=dist[u->getTag()-1]+1;
+					pred[v->getTag()-1]=u->getTag();
+					c.push(v);
+				}
+
+			}
+			r.push_back(u->getInfo());
+			color[u->getTag()-1]='n';
+		}
+	}
 }
 #endif /* GRAPH_H */
 

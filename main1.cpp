@@ -71,15 +71,18 @@ int main() {
 		cout<<grafo.costArc(1,i)<<endl;
 	}
 	*/
-	vector<int> pred (n), tdesc(n), tfinal(n);
+	vector<int> pred (n),dist(n), tdesc(n), tfinal(n);
 	grafo.print();
 	cout<<endl<<endl;
 	//grafo.dfs(pred, tdesc, tfinal, r);
-	r=grafo.dfsSimple();
+	//r=grafo.dfsSimple();
+	grafo.bfs(1, dist, pred, r);
 	printList(r);
 	cout<<endl;
-	//printVector(pred);
-	//cout<<endl;
+	printVector(pred);
+	cout<<endl;
+	printVector(dist);
+	cout<<endl;
 	//printVector(tdesc);
 	//cout<<endl;
 	//printVector(tfinal);
