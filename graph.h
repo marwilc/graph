@@ -38,11 +38,15 @@ class Graph
 
         static NodeVert<T> *findVert(const T&v ,NodeVert<T> *ptr);
         static NodeAdy<T> *findArc(const T&w, NodeAdy<T> *ptr);
+        static list< NodeVert <T>* > successorsPt(NodeVert<T> *v);
+        static void taging(NodeVert<T> *ptr, const int &tag);
+        static void recorridoDfs(NodeVert<T> *u, vector<char> &color, int &vf);
+        static vector<int> getGradeEntry(NodeVert<T> *ptr);
         list< NodeVert <T>* > predecessorsPtr(const T &v);
         list< NodeVert <T>* > successorsPtr(const T &v);//
         void dfsVisit(NodeVert<T> *u, vector<int> &pred, vector<int> &tdesc, vector<int> &tfinal, vector<char> &color, int &tiempo, list<T> &r);
         void dfsSimpleVisit(NodeVert<T> *u, list<T> &r, vector<char> &color);
-        static void taging(NodeVert<T> *ptr, const int &tag);
+
 
     public:
         //Constructor's
@@ -57,12 +61,20 @@ class Graph
         bool isEmpty()const {return(this->first==NULL);}//listo
         bool thereVert(const T &v)const;//listo
         bool thereArc(const T &v, const T &w)const;//listo
+        bool thereCyclesGraphDirect();//solo para grafos dirigidos
+        bool itIsAdjacent(const T &v, const T &w);//verifica si dos vertices son adyacentes
+        bool itIsIsolated(const T &v);//verifica si un vertice es de grado cero(aislado)
+        bool itIsSource(const T &v);//verifica si un vertice es fuente (sin arcos de entrada)
+        bool itIsSunken(const T &v);// verifica si un vertice es sumidero (sin arcos de salida)
         float costArc(const T &v, const T &w)const;//listo
         int orderGraph()const{return(this->nVert);};//listo
+        int nArcs()const {return(this->nArc);};
+        int gradeIn(const T &v); // grado de entrada de un vertice(cantidad de arcos que llegan a el)
+        int gradeOut(const T &v);// grado de salida de un vertice (cantidad de arcos que salen de el)
+        int grade(const T &v);// grado total del vertice(cantidad de arcos de entrada mas la cantidad de arcos de salida)
+        void print();//listo
         list<T> predecessors(const T &v)const;//listo
         list<T> successors(const T &v)const;//listo
-        void print();//listo
-        bool thereCycles();
         list<T> storageSuccesors();
         //modificadores
         void setG(NodeVert<T> *ptr);//innesesaria
@@ -77,6 +89,8 @@ class Graph
         list<T> dfsSimple(const T &v);//listo
         void dfs(vector<int> &pred, vector<int> &tdesc, vector<int> &tfinal, list<int> &r);//listoS
         void bfs(const T &s, vector<int> &dist, vector<int> &pred, list<T> &r);//listo
+        //ordenamiento
+        list<T> topologicalSort();
 };
 // Methods privates
 template <class T>
@@ -160,6 +174,23 @@ list<NodeVert <T>* > Graph<T>::successorsPtr(const T& v)
 }
 
 template <class T>
+list<NodeVert <T>* > Graph<T>::successorsPt(NodeVert<T> *v)
+{
+    list<NodeVert <T>* > p;
+    NodeAdy<T> *auxAdy;
+
+    if(v!=NULL)
+    {
+        auxAdy=v->getListAdy();
+        while(auxAdy!=NULL )
+        {
+        	p.push_back(auxAdy->getPtrVert());
+        	auxAdy=auxAdy->getNext();
+        }
+    }
+    return (p);
+}
+template <class T>
 void Graph<T>::dfsVisit(NodeVert<T> *u, vector<int> &pred, vector<int> &tdesc, vector<int> &tfinal, vector<char> &color, int &tiempo, list<T> &r)
 {
 	list< NodeVert <T>* > l;
@@ -220,6 +251,40 @@ void Graph<T>::taging(NodeVert<T> *ptr, const int &tag)
 
 	}
 
+}
+template <class T>
+void Graph<T>::recorridoDfs(NodeVert<T> *u, vector<char> &color, int &vf)// recorrido para ver si hay ciclos en un grafo dirigido
+{
+
+	list< NodeVert <T>* > l;
+	NodeVert<T> *v;
+
+	color[u->getTag()-1]='g';
+	l=successorsPt(u);
+	while(!l.empty())
+	{
+		v=l.front();
+		l.pop_front();
+		vf=v->getTag();
+		if(color.at(v->getTag()-1)=='\0')
+		{
+			recorridoDfs(v, color, vf);
+		}
+	}
+	color[u->getTag()-1]='n';
+}
+
+template <class T>
+vector<int> Graph<T>::getGradeEntry(NodeVert<T> *ptr)
+{
+	vector<int> grades;
+
+	while(ptr!=NULL)
+	{
+		grades.push_back(ptr->getGradeIn());
+		ptr=ptr->getNext();
+	}
+	return(grades);
 }
 
 //constuctor
@@ -300,6 +365,8 @@ void Graph<T>::clear()
             antVert->setPrev(NULL);
             antVert->setListAdy(NULL);
             antVert->setTag(0);
+            antVert->setGradeIn(0);
+            antVert->setGradeOut(0);
             delete(antVert);
         }
         this->first=NULL;
@@ -427,27 +494,117 @@ void Graph<T>::print()
 	    }
 }
 template <class T>
-bool Graph<T>:: thereCycles()
+bool Graph<T>:: thereCyclesGraphDirect()
 {
 	NodeVert<T> *vert;
-	bool band;
-	list<T> allSucessors;
-	if(!this->isEmpty())
+	int vf;
+	bool band=false;
+	if(this->first!=NULL)
 	{
-		allSucessors=this->storageSuccesors();
 		vert=first;
-		while(vert!=NULL)
+		while(vert!=NULL && !band)
 		{
-			if(vert->getListAdy()==NULL)
+			vector<char> color(this->nVert);
+			recorridoDfs(vert,color, vf);
+			if(vert->getTag()==vf)
 			{
-				allSucessors.remove(vert->getInfo());
+				band=true;
 			}
+			vf=-1;
 			vert=vert->getNext();
+
 		}
 	}
-	return(!allSucessors.empty());
+	return(band);
 }
 
+template <class T>
+bool Graph<T>:: itIsAdjacent(const T &v, const T &w)
+{
+	return(this->thereArc(v, w));
+}
+template <class T>
+bool Graph<T>::itIsIsolated(const T &v)
+{
+	NodeVert<T> *vert;
+	bool band=false;
+
+	vert=findVert(v,this->first);
+	if(vert!=NULL)
+	{
+		if(vert->getGradeIn()+vert->getGradeOut()==0)
+			band=true;
+	}
+	return(band);
+}
+template <class T>
+bool Graph<T>::itIsSource(const T &v)
+{
+	NodeVert<T> *vert;
+	bool band=false;
+
+	vert=findVert(v,this->first);
+	if(vert!=NULL)
+	{
+		if(vert->getGradeIn()==0)
+			band=true;
+	}
+	return(band);
+}
+template <class T>
+bool Graph<T>::itIsSunken(const T &v)
+{
+	NodeVert<T> *vert;
+	bool band=false;
+
+	vert=findVert(v,this->first);
+	if(vert!=NULL)
+	{
+		if(vert->getGradeOut()==0)
+			band=true;
+	}
+	return(band);
+}
+template <class T>
+int Graph<T>:: gradeIn(const T &v)
+{
+		NodeVert<T> *vert;
+		int entero=0;
+
+		vert=findVert(v,this->first);
+		if(vert!=NULL)
+		{
+			entero=vert->getGradeIn();
+		}
+		return(entero);
+}
+
+template <class T>
+int Graph<T>:: gradeOut(const T &v)
+{
+		NodeVert<T> *vert;
+		int entero=0;
+
+		vert=findVert(v,this->first);
+		if(vert!=NULL)
+		{
+			entero=vert->getGradeOut();
+		}
+		return(entero);
+}
+template<class T>
+int Graph<T>:: grade(const T &v)
+{
+		NodeVert<T> *vert;
+		int entero=0;
+
+		vert=findVert(v,this->first);
+		if(vert!=NULL)
+		{
+			entero=(vert->getGradeOut()+vert->getGradeIn());
+		}
+		return(entero);
+}
 template <class T>
 list<T> Graph<T>:: storageSuccesors()
 {
@@ -527,7 +684,8 @@ void Graph<T>::addArc(const T& v, const T& w, const float& c)
     vertB=findVert(w,first);
     if(vertA!=NULL && vertB!=NULL)
     {
-
+    	vertA->setGradeOut(vertA->getGradeOut()+1);
+    	vertB->setGradeIn(vertB->getGradeIn()+1);
     	antAdy=NULL;
         nextAdy=vertA->getListAdy();
         while(nextAdy!=NULL && nextAdy->getPtrVert()->getInfo()<w)
@@ -576,10 +734,12 @@ void Graph<T>::deleteVert(const T& v)
     	actAdy=actVert->getListAdy();
     	while(actAdy!=NULL)
     	{
+
     		antAdy=actAdy;
     		actAdy=actAdy->getNext();
     		antAdy->setNext(NULL);
     		antAdy->setPrev(NULL);
+    		antAdy->getPtrVert()->setGradeIn(antAdy->getPtrVert()->getGradeIn()-1);
     		antAdy->setPtrVert(NULL);
     		delete(antAdy);
     	}
@@ -615,7 +775,9 @@ void Graph<T>::deleteVert(const T& v)
     		   	   		   actAdy->setNext(NULL);
     		   	   		   actAdy->setPrev(NULL);
     		   	   	   }
+    		   actVert->setGradeOut(actVert->getGradeOut()-1);
     		   actAdy->setPtrVert(NULL);
+    		   actAdy->setCost(0.0);
     		   delete(actAdy);
     	   }
     	   vert=vert->getNext();
@@ -649,6 +811,8 @@ void Graph<T>::deleteVert(const T& v)
     				 actVert->setPrev(NULL);
     				 taging(nextVert,tag);
     			}
+    	actVert->setGradeIn(0);
+    	actVert->setGradeOut(0);
     	actVert->setTag(0);
     	delete(actVert);
     	this->nVert--;
@@ -669,6 +833,8 @@ void Graph<T>::deleteArc(const T &v, const T &w)
 		{
 			antAdy=actAdy->getPrev();
 			nextAdy=actAdy->getNext();
+			actVert->setGradeOut(actVert->getGradeOut()-1);
+			actAdy->getPtrVert()->setGradeIn(actAdy->getPtrVert()->getGradeIn()-1);
 			if(antAdy==NULL && nextAdy==NULL)
 			{
 				actVert->setListAdy(NULL);
@@ -691,7 +857,7 @@ void Graph<T>::deleteArc(const T &v, const T &w)
 						actAdy->setNext(NULL);
 						actAdy->setPrev(NULL);
 					}
-
+				actAdy->setPtrVert(NULL);
 				delete(actAdy);
 				nArc--;
 		}
@@ -727,6 +893,8 @@ void Graph<T>::replaceArc(const T &xv, const T &xw, const T &yw, const float cos
 			actAdy=findArc(xw,vertOrigen->getListAdy());
 			if(actAdy!=NULL)
 			{
+				vertDestino->setGradeIn(vertDestino->getGradeIn()+1);
+				actAdy->getPtrVert()->setGradeIn(actAdy->getPtrVert()->getGradeIn()-1);
 				actAdy->setPtrVert(vertDestino);
 				actAdy->setCost(cost);
 			}
@@ -734,6 +902,49 @@ void Graph<T>::replaceArc(const T &xv, const T &xw, const T &yw, const float cos
 	}
 }
 
+template <class T>
+list<T> Graph<T>:: topologicalSort()
+{
+	vector<int> gradeEntry(this->nVert);
+	queue<NodeVert <T> *> c;
+	list<NodeVert <T> *> l;
+	list<T> ord;
+	NodeVert<T> *vert, *u,*v;
+
+	if(this->first!=NULL)
+	{
+		vert=this->first;
+		gradeEntry=getGradeEntry(vert);
+		for(int i=1;i<=this->nVert;i++)
+		{
+			if(gradeEntry.at(vert->getTag()-1)==0)
+			{
+				c.push(vert);
+			}
+			vert=vert->getNext();
+		}
+		while(!c.empty())
+		{
+			u=c.front();
+			c.pop();
+			ord.push_back(u->getInfo());
+			l=successorsPt(u);
+			while(!l.empty())
+			{
+				v=l.front();
+				l.pop_front();
+				gradeEntry[v->getTag()-1]=gradeEntry[v->getTag()-1]-1;
+				if(gradeEntry.at(v->getTag()-1)==0)
+				{
+					c.push(v);
+				}
+			}
+		}
+	}
+	return(ord);
+
+
+}
 template <class T>
 void Graph<T>::dfs(vector<int> &pred, vector<int> &tdesc, vector<int> &tfinal, list<int> &r)
 {

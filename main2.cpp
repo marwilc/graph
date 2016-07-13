@@ -71,11 +71,17 @@ int main() {
 	*/
 	vector<int> pred (n), tdesc(n), tfinal(n), dist(n);
 	grafo.print();
+	grafo.deleteArc('A','B');
+
 	cout<<endl<<endl;
-	if(grafo.thereCycles())
-		cout<<"Tiene ciclos";
-	else
-		cout<<"No tiene ciclos";
+	grafo.print();
+	//if(grafo.thereCyclesGraphDirect())
+		//cout<<"Tiene ciclos";
+	//else
+	//{
+		//cout<<"No tiene ciclos";
+		//r=grafo.topologicalSort();
+	//}
 
 	cout<<endl;
 	//grafo.bfs('A', dist, pred, r);
