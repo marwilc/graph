@@ -20,6 +20,7 @@
 #include <stack>
 #include <vector>
 #include <limits>
+#include <string>
 #include "nodeAdy.h"
 #include "nodeVert.h"
 
@@ -89,6 +90,8 @@ class Graph
         list<T> dfsSimple(const T &v);//listo
         void dfs(vector<int> &pred, vector<int> &tdesc, vector<int> &tfinal, list<int> &r);//listoS
         void bfs(const T &s, vector<int> &dist, vector<int> &pred, list<T> &r);//listo
+        void centrality(vector<float> &result, list<T> &vertices);//
+        int centrality2(NodeVert<T> *vert);
         //ordenamiento
         list<T> topologicalSort();
 };
@@ -1050,7 +1053,7 @@ void Graph<T>::bfs(const T &s, vector<int> &dist, vector<int> &pred, list<T> &r)
 		color[aux->getTag()-1]='g';
 		dist[aux->getTag()-1]=0;
 		c.push(aux);
-		r.push_back(s);
+		//r.push_back(s);
 		while(!c.empty())
 		{
 			u=c.front();
@@ -1074,6 +1077,77 @@ void Graph<T>::bfs(const T &s, vector<int> &dist, vector<int> &pred, list<T> &r)
 			color[u->getTag()-1]='n';
 		}
 	}
+}
+
+template <class T>
+void Graph<T>::centrality(vector<float> &result, list<T> &vertices)
+{
+	NodeVert<T> *vert;
+	int i;
+
+
+	vert=this->first;
+	for(i=1;i<=this->orderGraph();i++)
+	{
+		result[i-1]=(float)1/((float)this->centrality2(vert));
+		vertices.push_back(vert->getInfo());
+		vert=vert->getNext();
+	}
+	
+	
+}
+template<class T>
+int Graph<T>::centrality2(NodeVert<T> *vert)
+{
+	int i;
+	int distmax=-1;
+	NodeVert<T> *aux, *v, *u;
+	queue<NodeVert<T> *> c;
+	list< NodeVert <T> *> l;
+	vector<char> color(this->orderGraph());
+	vector<int> dist(this->orderGraph());
+
+
+	//aux=findVert(s, first);
+	aux=vert;
+	if(aux!=NULL)
+	{
+		for(i=0;i<this->orderGraph();i++)
+		{
+			color[i]='b';
+			dist[i]=-1;
+		}
+		color[aux->getTag()-1]='g';
+		dist[aux->getTag()-1]=0;
+		c.push(aux);
+		//r.push_back(s);
+		while(!c.empty())
+		{
+			u=c.front();
+			c.pop();
+			l=this->successorsPtr(u->getInfo());
+			while(!l.empty())
+			{
+				v=l.front();
+				l.pop_front();
+				if(color[v->getTag()-1]=='b')
+				{
+
+					color[v->getTag()-1]='g';
+					dist[v->getTag()-1]=dist[u->getTag()-1]+1;
+					if(dist[v->getTag()-1]>distmax)
+						distmax=dist[v->getTag()-1];
+					//pred[v->getTag()-1]=u->getTag();
+					c.push(v);
+				}
+
+			}
+			//r.push_back(u->getInfo());
+			color[u->getTag()-1]='n';
+		}
+		
+	}
+	return(distmax);
 }
 #endif /* GRAPH_H */
 
